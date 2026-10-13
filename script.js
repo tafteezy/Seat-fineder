@@ -2,7 +2,7 @@
 // Published data lives in Supabase (see schema.sql). Only the unfinished form is kept in localStorage.
 
 const KEY = "seatfinder_studio";
-const FREE_LIMIT = 50;
+const FREE_LIMIT = 300;
 const STEPS = ["Couple", "Guests", "Theme", "Publish"];
 const PALETTES = [
   ["Baby Blue", "#7b86a3"], ["Champagne Rose", "#9c7f6d"], ["Sage & Ivory", "#6f7f69"],
