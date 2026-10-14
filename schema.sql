@@ -69,7 +69,7 @@ end $$;
 create function create_wedding(p jsonb, g jsonb) returns json language plpgsql security definer set search_path = public, extensions as $$
 declare base text; s text; tok text; wid uuid; tries int := 0;
 begin
-  if jsonb_array_length(g) > 50 then raise exception 'The free plan is limited to 50 guests'; end if;   -- change 50 to raise the limit
+  if jsonb_array_length(g) > 300 then raise exception 'The free plan is limited to 300 guests'; end if;   -- change 50 to raise the limit
   if btrim(coalesce(p->>'n1', '')) = '' or btrim(coalesce(p->>'n2', '')) = '' or btrim(coalesce(p->>'email', '')) = '' then
     raise exception 'Names and email are required';
   end if;
