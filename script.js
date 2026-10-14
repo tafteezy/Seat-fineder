@@ -2,7 +2,6 @@
 // Published data lives in Supabase (see schema.sql). Only the unfinished form is kept in localStorage.
 
 const KEY = "seatfinder_studio";
-const FREE_LIMIT = 300;
 const STEPS = ["Couple", "Guests", "Theme", "Publish"];
 const PALETTES = [
   ["Baby Blue", "#7b86a3"], ["Champagne Rose", "#9c7f6d"], ["Sage & Ivory", "#6f7f69"],
@@ -42,8 +41,21 @@ const app = document.getElementById("app");
 let step = 0;
 let V = null; // public details of the wedding being viewed on the guest page
 
-const sb = window.supabase && window.SUPABASE_URL && !window.SUPABASE_URL.includes("YOUR-PROJECT")
-  ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+// config.js should hold just the base address (https://<ref>.supabase.co). Tidy common copy-paste slips:
+// extra path (/rest/v1/...), a trailing slash, or the dashboard address (supabase.com/dashboard/project/<ref>).
+function cleanSupabaseUrl(raw) {
+  try {
+    const u = new URL(String(raw).trim());
+    const dash = u.pathname.match(/\/project\/([a-z0-9]+)/i);
+    if (/(^|\.)supabase\.com$/.test(u.hostname)) return dash ? `https://${dash[1]}.supabase.co` : "";
+    return u.origin;
+  } catch (e) {
+    return "";
+  }
+}
+const SUPABASE_BASE = cleanSupabaseUrl(window.SUPABASE_URL);
+const sb = window.supabase && SUPABASE_BASE && !/your-project/i.test(SUPABASE_BASE)
+  ? window.supabase.createClient(SUPABASE_BASE, window.SUPABASE_ANON_KEY)
   : null;
 
 /* ---------- Helpers ---------- */
@@ -237,7 +249,7 @@ function shell(panel) {
     h("div", { class: "top" }, h("div", { class: "logo" }, "Seat ", h("i", null, "Finder")), h("button", { class: "hm", style: "margin:0;color:#a99cc4", onclick: reset }, "Start over")),
     h("div", { class: "eyebrow" }, "SEAT FINDER STUDIO"),
     h("h1", { class: "t" }, "Design your seat finder"),
-    h("p", { class: "sub" }, "Free for small weddings · No subscriptions, no hidden fees · Your private QR site"),
+    h("p", { class: "sub" }, "Free · No subscriptions, no hidden fees · Your private QR site"),
     steps, panel));
   window.scrollTo(0, 0);
 }
@@ -395,17 +407,14 @@ function stepTheme() {
 /* ---------- Step 4: publish ---------- */
 
 function stepPublish() {
-  const over = S.guests.length > FREE_LIMIT;
   const n = nav(() => go(2), publish, S.token ? "Save changes" : "Publish for free");
   n.n.lastChild.remove(); // no arrow on this button
-  n.n.disabled = over;
-  const perks = ["Private URL for " + S.email, "Downloadable QR code for your tables & entry", "Edit guests & theme anytime before your wedding date", "Free for small weddings"];
-  return h("div", { class: "panel s" }, h("h2", null, "Confirm & publish"), h("p", { class: "sub" }, `Up to ${FREE_LIMIT} guests is completely free.`),
+  const perks = ["Private URL for " + S.email, "Downloadable QR code for your tables & entry", "Edit guests & theme anytime before your wedding date", "Free to use"];
+  return h("div", { class: "panel s" }, h("h2", null, "Confirm & publish"), h("p", { class: "sub" }, "Check your details, then publish."),
     h("div", { class: "sum" }, h("small", null, "Your seat finder"), h("div", { class: "n" }, S.n1, " ", h("i", null, "&"), " ", S.n2), h("hr"),
       h("div", { class: "m" }, `${S.guests.length} guests · ${S.tbd ? "Date TBC" : S.date} · ${pal()[0]} · ${S.dark ? "Dark" : "Light"}`),
-      h("span", { class: "badge" }, `Free · ${FREE_LIMIT} guests or fewer`)),
+      h("span", { class: "badge" }, "Free")),
     h("ul", { class: "ok" }, perks.map((p) => h("li", null, h("span", null, ic("check", 10)), p))),
-    over ? h("p", { class: "legal" }, `The free plan is limited to ${FREE_LIMIT} guests. Remove some guests to publish.`) : null,
     h("p", { class: "legal" }, "By publishing, you accept our ", h("a", { href: "#" }, "Terms & Conditions"), " and ", h("a", { href: "#" }, "Privacy Policy"), "."),
     n.row);
 }
