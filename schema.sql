@@ -159,7 +159,7 @@ declare wid uuid;
 begin
   wid := token_ok(p_slug, p_token);
   if wid is null then return false; end if;
-  if jsonb_array_length(g) > 50 then raise exception 'The free plan is limited to 50 guests'; end if;
+  if jsonb_array_length(g) > 300 then raise exception 'The free plan is limited to 50 guests'; end if;
   update weddings set n1 = left(p->>'n1', 80), n2 = left(p->>'n2', 80), email = left(p->>'email', 200),
     wedding_date = nullif(p->>'date', '')::date, tbd = coalesce((p->>'tbd')::boolean, false), tz = left(p->>'tz', 60),
     photo = case when length(coalesce(p->>'photo', '')) < 300000 then p->>'photo' else photo end,
